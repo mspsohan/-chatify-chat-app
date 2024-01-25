@@ -1,25 +1,46 @@
-
+// External Import
 const express = require('express');
-const { chats } = require('./data/data')
+const dotenv = require('dotenv');
+const cors = require('cors');
+const connectDB = require('./config/db');
+const colors = require('colors');
+const morgan = require('morgan');
+
+// Internal Imports
+const userRoutes = require("./routes/userRoutes");
+const chatRoutes = require("./routes/chatRoutes");
+const messageRoutes = require("./routes/messageRoutes");
+const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 const app = express()
+app.use(express.json())
+app.use(morgan('dev'));
+dotenv.config()
+app.use(cors({
+   origin: ["http://localhost:5173"],
+   optionsSuccessStatus: 200,
+}))
 
 app.get("/", (req, res) => {
    res.send("Api is Running")
 })
 
-app.get("/api/chat", (req, res) => {
-   res.send(chats)
-})
-
-app.get('/api/chat/:id', (req, res) => {
-   const singleChat = chats.find((chat) => chat._id === req.params.id)
-   res.send(singleChat)
-})
+app.use('/api/user', userRoutes)
+app.use('/api/chat', chatRoutes)
+app.use("/api/message", messageRoutes);
 
 
-const port = process.env.PORT || 5000
+// Error Handling middlewares
+app.use(notFound);
+app.use(errorHandler);
 
-app.listen(port, () => {
-   console.log(`Server running on port: ${port}`)
-})
+
+
+const main = () => {
+   connectDB()
+   app.listen(process.env.PORT, () => {
+      console.log(`Server running on port: ${process.env.PORT}`)
+   })
+}
+
+main()

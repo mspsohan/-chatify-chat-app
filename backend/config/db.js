@@ -1,0 +1,18 @@
+const mongoose = require("mongoose");
+const colors = require("colors");
+const dotenv = require('dotenv');
+dotenv.config()
+
+const connectDB = async () => {
+   try {
+      const mongoURI = process.env.MONGODB_URI
+      const conn = await mongoose.connect(mongoURI, { dbName: process.env.DB_NAME });
+
+      console.log(`MongoDB Connected: ${conn.connection.host}`.yellow);
+   } catch (error) {
+      console.error(`Error: ${error.message}`.red.bold);
+      process.exit(1); // Exit with a non-zero status code to indicate an error
+   }
+};
+
+module.exports = connectDB;
